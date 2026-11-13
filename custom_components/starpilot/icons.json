@@ -1,0 +1,42 @@
+{
+  "entity": {
+    "sensor": {
+      "status": {
+        "default": "mdi:car",
+        "state": {
+          "parked": "mdi:car-brake-parking",
+          "standby": "mdi:car-key",
+          "driving": "mdi:steering"
+        }
+      },
+      "fan_speed": { "default": "mdi:fan" },
+      "memory_usage": { "default": "mdi:memory" },
+      "storage_free": { "default": "mdi:harddisk" },
+      "car_battery_voltage": { "default": "mdi:car-battery" },
+      "processes": { "default": "mdi:format-list-checks" },
+      "version": { "default": "mdi:star-four-points" },
+      "driving_model": { "default": "mdi:brain" },
+      "last_drive_distance": { "default": "mdi:map-marker-distance" },
+      "last_drive_engaged": { "default": "mdi:steering" },
+      "week_distance": { "default": "mdi:map-marker-distance" },
+      "total_distance": { "default": "mdi:counter" },
+      "navigation": { "default": "mdi:navigation" },
+      "destination": { "default": "mdi:map-marker" },
+      "external_gpu_status": { "default": "mdi:expansion-card" }
+    },
+    "select": {
+      "drive_mode": { "default": "mdi:car-cog" }
+    },
+    "button": {
+      "clear_destination": { "default": "mdi:map-marker-off" },
+      "check_for_updates": { "default": "mdi:update" }
+    },
+    "event": {
+      "drive": { "default": "mdi:flag-checkered" },
+      "notification": { "default": "mdi:bell" }
+    }
+  },
+  "services": {
+    "navigate": { "service": "mdi:navigation" }
+  }
+}

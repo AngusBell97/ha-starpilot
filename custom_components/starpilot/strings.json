@@ -1,0 +1,189 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to StarPilot",
+        "description": "Enter the address Galaxy shows for your comma on your home network. Give the comma a fixed address in your router so it does not change.",
+        "data": {
+          "host": "Address",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "The comma's IP address, for example 192.168.1.50.",
+          "port": "Galaxy uses 8082 unless you changed it."
+        }
+      },
+      "reconfigure": {
+        "title": "Change the comma's address",
+        "data": {
+          "host": "Address",
+          "port": "Port"
+        },
+        "data_description": {
+          "host": "The comma's IP address, for example 192.168.1.50.",
+          "port": "Galaxy uses 8082 unless you changed it."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Galaxy did not answer at that address. Check that the comma is on and on the same network.",
+      "not_local": "Galaxy refused the connection. It only allows devices on the same local network, reached by IP address and without a proxy in between.",
+      "unknown": "Something unexpected went wrong. Check the Home Assistant log."
+    },
+    "abort": {
+      "already_configured": "This comma is already set up.",
+      "reconfigure_successful": "The address was changed.",
+      "wrong_device": "A different comma answered at that address."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "name": "Status",
+        "state": {
+          "parked": "Parked",
+          "standby": "Car on",
+          "driving": "Driving"
+        }
+      },
+      "temperature": { "name": "Temperature" },
+      "cpu_temperature": { "name": "CPU temperature" },
+      "gpu_temperature": { "name": "GPU temperature" },
+      "memory_temperature": { "name": "Memory temperature" },
+      "fan_speed": { "name": "Fan speed" },
+      "memory_usage": { "name": "Memory usage" },
+      "storage_free": { "name": "Free storage" },
+      "car_battery_voltage": { "name": "Car battery voltage" },
+      "last_boot": { "name": "Last boot" },
+      "processes": { "name": "Processes running" },
+      "version": { "name": "StarPilot version" },
+      "driving_model": { "name": "Driving model" },
+      "last_drive_distance": { "name": "Last drive distance" },
+      "last_drive_duration": { "name": "Last drive duration" },
+      "last_drive_engaged": { "name": "Last drive engaged" },
+      "last_drive_end": { "name": "Last drive ended" },
+      "week_distance": { "name": "Distance in the past week" },
+      "total_distance": { "name": "Total distance" },
+      "navigation": {
+        "name": "Navigation",
+        "state": {
+          "disabled": "Off",
+          "needs_key": "Needs a map key",
+          "no_destination": "No destination",
+          "waiting_for_location": "Waiting for location",
+          "routing": "Finding a route",
+          "route_unavailable": "No route found",
+          "guiding": "Guiding",
+          "arrived": "Arrived"
+        }
+      },
+      "destination": { "name": "Destination" },
+      "external_gpu_status": { "name": "{gpu} status" },
+      "external_gpu_temperature": { "name": "{gpu} temperature" },
+      "external_gpu_memory_temperature": { "name": "{gpu} memory temperature" },
+      "external_gpu_power": { "name": "{gpu} power" },
+      "external_gpu_supply_voltage": { "name": "{gpu} supply voltage" }
+    },
+    "binary_sensor": {
+      "driving": { "name": "Driving" },
+      "update_available": { "name": "Update" },
+      "process_problem": { "name": "Processes" },
+      "external_gpu_running_model": { "name": "{gpu} running the driving model" }
+    },
+    "select": {
+      "drive_mode": {
+        "name": "Drive state",
+        "state": {
+          "auto": "Automatic",
+          "offroad": "Always offroad",
+          "onroad": "Always onroad"
+        }
+      }
+    },
+    "button": {
+      "clear_destination": { "name": "Clear destination" },
+      "check_for_updates": { "name": "Check for updates" }
+    },
+    "device_tracker": {
+      "location": { "name": "Location" }
+    },
+    "event": {
+      "drive": {
+        "name": "Drive",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "finished": "Finished"
+            }
+          }
+        }
+      },
+      "notification": {
+        "name": "Notification",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "sentry_warning": "Sentry warning",
+              "sentry_alarm": "Sentry alarm",
+              "sentry_battery": "Sentry low battery",
+              "drive_summary": "Drive summary",
+              "model_release": "New driving model",
+              "update_available": "Update available",
+              "update_installed": "Update installed",
+              "test": "Test"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "navigate": {
+      "name": "Set destination",
+      "description": "Sends a destination to the comma's navigation. Give either a search or a latitude and longitude.",
+      "fields": {
+        "config_entry_id": {
+          "name": "comma",
+          "description": "Which comma to send it to. Only needed when more than one is set up."
+        },
+        "query": {
+          "name": "Search",
+          "description": "A place or address to search for. The first result is used. Needs a map key on the comma."
+        },
+        "name": {
+          "name": "Name",
+          "description": "The name to show for a latitude and longitude."
+        },
+        "address": {
+          "name": "Address",
+          "description": "An address line to show under the name."
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "Latitude of the destination."
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Longitude of the destination."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "action_failed": {
+      "message": "The comma did not accept that: {error}"
+    },
+    "no_device": {
+      "message": "No comma is connected right now."
+    },
+    "choose_device": {
+      "message": "More than one comma is set up. Choose which one to use."
+    },
+    "destination_required": {
+      "message": "Give either a search, or a latitude and longitude."
+    },
+    "no_search_result": {
+      "message": "The comma found nothing for \"{query}\"."
+    }
+  }
+}

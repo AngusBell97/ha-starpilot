@@ -1,0 +1,37 @@
+navigate:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: starpilot
+    query:
+      required: false
+      example: "Bristol Airport"
+      selector:
+        text:
+    name:
+      required: false
+      example: "Work"
+      selector:
+        text:
+    address:
+      required: false
+      selector:
+        text:
+    latitude:
+      required: false
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      required: false
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
+          mode: box
