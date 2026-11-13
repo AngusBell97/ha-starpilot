@@ -29,6 +29,10 @@ class StarPilotBinarySensorDescription(BinarySensorEntityDescription):
     attributes_fn: Callable[[dict[str, Any]], dict[str, Any] | None] | None = None
 
 
+def _flag(value: Any) -> bool | None:
+    return value if isinstance(value, bool) else None
+
+
 def _driving(data: dict[str, Any]) -> bool | None:
     state = dig(data, "state", "state")
     return None if state is None else state == "driving"
@@ -80,6 +84,26 @@ BINARY_SENSORS: tuple[StarPilotBinarySensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         is_on_fn=_process_problem,
         attributes_fn=lambda data: {"stopped": dig(data, "monitor", "managed", "stopped")},
+    ),
+    StarPilotBinarySensorDescription(
+        key="remote_access",
+        translation_key="remote_access",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        is_on_fn=lambda data: _flag(dig(data, "remote", "paired")),
+    ),
+    StarPilotBinarySensorDescription(
+        key="hotspot",
+        translation_key="hotspot",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        is_on_fn=lambda data: _flag(dig(data, "hotspot", "active")),
+    ),
+    StarPilotBinarySensorDescription(
+        key="model_download",
+        translation_key="model_download",
+        device_class=BinarySensorDeviceClass.RUNNING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        is_on_fn=lambda data: _flag(dig(data, "manager", "downloading")),
     ),
     StarPilotBinarySensorDescription(
         key="external_gpu_running_model",

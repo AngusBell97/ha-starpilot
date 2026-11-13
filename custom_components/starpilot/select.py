@@ -57,4 +57,4 @@ class DriveModeSelect(StarPilotEntity, SelectEntity):
             raise HomeAssistantError(
                 translation_domain=DOMAIN, translation_key="action_failed", translation_placeholders={"error": str(error)}
             ) from error
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_refresh()

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from urllib.parse import quote
 
 import aiohttp
 
@@ -132,3 +133,43 @@ class GalaxyClient:
         """Clear the navigation destination."""
         navigation = await self._call("GET", "/api/navigation/status")
         return await self._call("POST", "/api/navigation/action", {"action": "clear", "revision": navigation["revision"]})
+
+    async def async_configure_navigation(self, patch: dict[str, Any]) -> dict[str, Any]:
+        """Change navigation switches such as avoidTolls or slowForTurns."""
+        navigation = await self._call("GET", "/api/navigation/status")
+        return await self._call(
+            "POST", "/api/navigation/action", {"action": "configure", "revision": navigation["revision"], "patch": patch}
+        )
+
+    async def async_reset_gpu_peaks(self, kind: str) -> dict[str, Any]:
+        """Forget the highest temperatures logged for an external GPU."""
+        return await self._call("POST", "/api/system/monitor/reset-peaks", {"gpu": kind})
+
+    async def async_settings_page(self, page: str) -> dict[str, Any]:
+        """Read one Galaxy settings page: its rows, current values and choices."""
+        return await self._call("GET", "/api/settings/pages/" + quote(page, safe="/"))
+
+    async def async_set_setting(self, page: str, label: str, value: str | float) -> dict[str, Any]:
+        """Change one setting the way Galaxy's own page does: preview, then confirm."""
+        data = await self.async_settings_page(page)
+        rows = data.get("rows") if isinstance(data, dict) else None
+        rows = rows if isinstance(rows, list) else []
+        wanted = label.strip().casefold()
+        matches = [
+            index
+            for index, row in enumerate(rows)
+            if isinstance(row, dict) and str(row.get("label", "")).strip().casefold() == wanted
+        ]
+        if not matches:
+            raise GalaxyApiError(404, f'There is no setting called "{label}" on the {page} page')
+        if len(matches) > 1:
+            raise GalaxyApiError(409, f'More than one setting is called "{label}" on the {page} page')
+        row = rows[matches[0]]
+        if row.get("available") is False:
+            raise GalaxyApiError(409, f'"{row["label"]}" cannot be changed right now')
+        name, previous = row["label"], row.get("value")
+        preview = await self._call(
+            "POST", "/api/settings/preview", {"view": data["view"], "row": matches[0], "value": value}
+        )
+        await self._call("POST", "/api/settings/confirm", {"intent": preview["intent"], "confirmed": True})
+        return {"setting": name, "previous": previous, "value": preview.get("proposed")}

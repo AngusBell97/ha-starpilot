@@ -46,24 +46,60 @@
           "driving": "Driving"
         }
       },
-      "temperature": { "name": "Temperature" },
-      "cpu_temperature": { "name": "CPU temperature" },
-      "gpu_temperature": { "name": "GPU temperature" },
-      "memory_temperature": { "name": "Memory temperature" },
-      "fan_speed": { "name": "Fan speed" },
-      "memory_usage": { "name": "Memory usage" },
-      "storage_free": { "name": "Free storage" },
-      "car_battery_voltage": { "name": "Car battery voltage" },
-      "last_boot": { "name": "Last boot" },
-      "processes": { "name": "Processes running" },
-      "version": { "name": "StarPilot version" },
-      "driving_model": { "name": "Driving model" },
-      "last_drive_distance": { "name": "Last drive distance" },
-      "last_drive_duration": { "name": "Last drive duration" },
-      "last_drive_engaged": { "name": "Last drive engaged" },
-      "last_drive_end": { "name": "Last drive ended" },
-      "week_distance": { "name": "Distance in the past week" },
-      "total_distance": { "name": "Total distance" },
+      "temperature": {
+        "name": "Temperature"
+      },
+      "cpu_temperature": {
+        "name": "CPU temperature"
+      },
+      "gpu_temperature": {
+        "name": "GPU temperature"
+      },
+      "memory_temperature": {
+        "name": "Memory temperature"
+      },
+      "fan_speed": {
+        "name": "Fan speed"
+      },
+      "memory_usage": {
+        "name": "Memory usage"
+      },
+      "storage_free": {
+        "name": "Free storage"
+      },
+      "car_battery_voltage": {
+        "name": "Car battery voltage"
+      },
+      "last_boot": {
+        "name": "Last boot"
+      },
+      "processes": {
+        "name": "StarPilot processes running"
+      },
+      "version": {
+        "name": "StarPilot version"
+      },
+      "driving_model": {
+        "name": "Driving model"
+      },
+      "last_drive_distance": {
+        "name": "Last drive distance"
+      },
+      "last_drive_duration": {
+        "name": "Last drive duration"
+      },
+      "last_drive_engaged": {
+        "name": "Last drive engaged"
+      },
+      "last_drive_end": {
+        "name": "Last drive ended"
+      },
+      "week_distance": {
+        "name": "Distance in the past week"
+      },
+      "total_distance": {
+        "name": "Total distance"
+      },
       "navigation": {
         "name": "Navigation",
         "state": {
@@ -77,18 +113,218 @@
           "arrived": "Arrived"
         }
       },
-      "destination": { "name": "Destination" },
-      "external_gpu_status": { "name": "{gpu} status" },
-      "external_gpu_temperature": { "name": "{gpu} temperature" },
-      "external_gpu_memory_temperature": { "name": "{gpu} memory temperature" },
-      "external_gpu_power": { "name": "{gpu} power" },
-      "external_gpu_supply_voltage": { "name": "{gpu} supply voltage" }
+      "destination": {
+        "name": "Destination"
+      },
+      "external_gpu_status": {
+        "name": "{gpu} status"
+      },
+      "external_gpu_temperature": {
+        "name": "{gpu} temperature"
+      },
+      "external_gpu_memory_temperature": {
+        "name": "{gpu} memory temperature"
+      },
+      "external_gpu_power": {
+        "name": "{gpu} power"
+      },
+      "external_gpu_supply_voltage": {
+        "name": "{gpu} supply voltage"
+      },
+      "drive_state_in_effect": {
+        "name": "Drive state in effect",
+        "state": {
+          "offroad": "Offroad",
+          "onroad": "Onroad"
+        }
+      },
+      "thermal_status": {
+        "name": "Thermal status"
+      },
+      "cpu_usage": {
+        "name": "CPU usage"
+      },
+      "cpu_core_usage": {
+        "name": "CPU core {core} usage"
+      },
+      "memory_used": {
+        "name": "Memory used"
+      },
+      "storage_usage": {
+        "name": "Storage used"
+      },
+      "process_count": {
+        "name": "All processes"
+      },
+      "branch": {
+        "name": "Branch"
+      },
+      "updater_state": {
+        "name": "Updater"
+      },
+      "last_update_check": {
+        "name": "Last update check"
+      },
+      "changed_settings": {
+        "name": "Changed settings"
+      },
+      "crash_reports": {
+        "name": "Crash reports"
+      },
+      "sentry_events": {
+        "name": "Sentry events"
+      },
+      "outside_temperature": {
+        "name": "Outside temperature"
+      },
+      "loaded_model": {
+        "name": "Loaded driving model"
+      },
+      "small_model": {
+        "name": "Small driving model"
+      },
+      "model_health": {
+        "name": "Driving model health"
+      },
+      "models_installed": {
+        "name": "Driving models installed"
+      },
+      "last_drive_always_on_lateral": {
+        "name": "Last drive Always On Lateral"
+      },
+      "last_drive_start": {
+        "name": "Last drive started"
+      },
+      "last_drive_model": {
+        "name": "Last drive model"
+      },
+      "last_drive_distracted": {
+        "name": "Last drive distracted moments"
+      },
+      "last_drive_unresponsive": {
+        "name": "Last drive unresponsive moments"
+      },
+      "week_duration": {
+        "name": "Driving time in the past week"
+      },
+      "week_drives": {
+        "name": "Drives in the past week"
+      },
+      "week_engaged": {
+        "name": "Engaged in the past week"
+      },
+      "total_duration": {
+        "name": "Total driving time"
+      },
+      "total_drives": {
+        "name": "Total drives"
+      },
+      "total_engaged": {
+        "name": "Total engaged"
+      },
+      "record_longest_drive": {
+        "name": "Record: longest drive"
+      },
+      "record_best_week": {
+        "name": "Record: best week"
+      },
+      "record_most_engaged_day": {
+        "name": "Record: most engaged day"
+      },
+      "record_longest_undistracted_drive": {
+        "name": "Record: longest undistracted drive"
+      },
+      "record_highest_streak": {
+        "name": "Record: highest streak"
+      },
+      "record_clean_drive_streak": {
+        "name": "Record: clean drive streak"
+      },
+      "drive_analysis": {
+        "name": "Drive analysis"
+      },
+      "navigation_instruction": {
+        "name": "Next instruction"
+      },
+      "gps_source": {
+        "name": "GPS source"
+      },
+      "navigation_network": {
+        "name": "Navigation network",
+        "state": {
+          "online": "Online",
+          "offline": "Offline",
+          "unknown": "Unknown"
+        }
+      },
+      "mapbox_searches": {
+        "name": "Map searches used"
+      },
+      "mapbox_geocoding": {
+        "name": "Map address lookups used"
+      },
+      "mapbox_map_tiles": {
+        "name": "Map tiles used"
+      },
+      "mapbox_directions": {
+        "name": "Map routes used"
+      },
+      "external_gpu_link": {
+        "name": "{gpu} link"
+      },
+      "external_gpu_highest_temperature": {
+        "name": "{gpu} highest temperature"
+      },
+      "external_gpu_highest_memory_temperature": {
+        "name": "{gpu} highest memory temperature"
+      },
+      "external_gpu_usage": {
+        "name": "{gpu} usage"
+      },
+      "external_gpu_supply_power": {
+        "name": "{gpu} supply power"
+      },
+      "external_gpu_supply_current": {
+        "name": "{gpu} supply current"
+      },
+      "external_gpu_clock": {
+        "name": "{gpu} clock"
+      },
+      "external_gpu_fan_speed": {
+        "name": "{gpu} fan speed"
+      },
+      "external_gpu_frame_time": {
+        "name": "{gpu} frame time"
+      },
+      "external_gpu_usb_speed": {
+        "name": "{gpu} USB speed"
+      },
+      "external_gpu_usb_link_errors": {
+        "name": "{gpu} USB link errors"
+      }
     },
     "binary_sensor": {
-      "driving": { "name": "Driving" },
-      "update_available": { "name": "Update" },
-      "process_problem": { "name": "Processes" },
-      "external_gpu_running_model": { "name": "{gpu} running the driving model" }
+      "driving": {
+        "name": "Driving"
+      },
+      "update_available": {
+        "name": "Update"
+      },
+      "process_problem": {
+        "name": "Processes"
+      },
+      "external_gpu_running_model": {
+        "name": "{gpu} running the driving model"
+      },
+      "remote_access": {
+        "name": "Galaxy remote access"
+      },
+      "hotspot": {
+        "name": "Galaxy hotspot"
+      },
+      "model_download": {
+        "name": "Driving model download"
+      }
     },
     "select": {
       "drive_mode": {
@@ -101,11 +337,20 @@
       }
     },
     "button": {
-      "clear_destination": { "name": "Clear destination" },
-      "check_for_updates": { "name": "Check for updates" }
+      "clear_destination": {
+        "name": "Clear destination"
+      },
+      "check_for_updates": {
+        "name": "Check for updates"
+      },
+      "reset_external_gpu_peaks": {
+        "name": "Reset {gpu} highest temperatures"
+      }
     },
     "device_tracker": {
-      "location": { "name": "Location" }
+      "location": {
+        "name": "Location"
+      }
     },
     "event": {
       "drive": {
@@ -134,6 +379,23 @@
             }
           }
         }
+      }
+    },
+    "switch": {
+      "navigation_enabled": {
+        "name": "Navigation"
+      },
+      "slow_for_turns": {
+        "name": "Slow for turns"
+      },
+      "avoid_tolls": {
+        "name": "Avoid tolls"
+      },
+      "avoid_motorways": {
+        "name": "Avoid motorways"
+      },
+      "avoid_ferries": {
+        "name": "Avoid ferries"
       }
     }
   },
@@ -165,6 +427,42 @@
         "longitude": {
           "name": "Longitude",
           "description": "Longitude of the destination."
+        }
+      }
+    },
+    "get_settings": {
+      "name": "Get settings",
+      "description": "Reads one Galaxy settings page: each setting, its value and the values it accepts.",
+      "fields": {
+        "config_entry_id": {
+          "name": "comma",
+          "description": "Which comma to use. Only needed when more than one is set up."
+        },
+        "page": {
+          "name": "Page",
+          "description": "The page's ID as in its Galaxy address, for example sounds, lane_change, slc or aol. The hub page lists them all."
+        }
+      }
+    },
+    "set_setting": {
+      "name": "Change a setting",
+      "description": "Changes one StarPilot setting the way Galaxy's own page does. Most settings can only be changed while parked.",
+      "fields": {
+        "config_entry_id": {
+          "name": "comma",
+          "description": "Which comma to use. Only needed when more than one is set up."
+        },
+        "page": {
+          "name": "Page",
+          "description": "The page's ID as in its Galaxy address, for example sounds or lane_change."
+        },
+        "setting": {
+          "name": "Setting",
+          "description": "The setting's name exactly as the page shows it."
+        },
+        "value": {
+          "name": "Value",
+          "description": "One of the setting's choices (such as On, Off or 50%), or a number for a slider."
         }
       }
     }

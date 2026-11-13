@@ -14,7 +14,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .api import GalaxyClient, GalaxyError
 from .const import DOMAIN
-from .coordinator import StarPilotConfigEntry, StarPilotCoordinator
+from .coordinator import StarPilotConfigEntry, StarPilotCoordinator, external_gpu
 from .entity import StarPilotEntity
 
 PARALLEL_UPDATES = 1
@@ -49,7 +49,26 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: StarPilotConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
     """Add the buttons."""
-    async_add_entities(StarPilotButton(entry.runtime_data, description) for description in BUTTONS)
+    coordinator = entry.runtime_data
+    async_add_entities(StarPilotButton(coordinator, description) for description in BUTTONS)
+    gpu = external_gpu(coordinator.data)
+    if gpu is not None and gpu.get("peaksResettable") is True and isinstance(gpu.get("kind"), str):
+        kind, name = gpu["kind"], gpu.get("name")
+        async_add_entities(
+            [
+                StarPilotButton(
+                    coordinator,
+                    StarPilotButtonDescription(
+                        key="reset_external_gpu_peaks",
+                        translation_key="reset_external_gpu_peaks",
+                        entity_category=EntityCategory.CONFIG,
+                        press_fn=lambda client: client.async_reset_gpu_peaks(kind),
+                        refresh=("monitor",),
+                    ),
+                    {"gpu": name if isinstance(name, str) and name else "External GPU"},
+                )
+            ]
+        )
 
 
 class StarPilotButton(StarPilotEntity, ButtonEntity):
@@ -57,9 +76,16 @@ class StarPilotButton(StarPilotEntity, ButtonEntity):
 
     entity_description: StarPilotButtonDescription
 
-    def __init__(self, coordinator: StarPilotCoordinator, description: StarPilotButtonDescription) -> None:
+    def __init__(
+        self,
+        coordinator: StarPilotCoordinator,
+        description: StarPilotButtonDescription,
+        placeholders: dict[str, str] | None = None,
+    ) -> None:
         super().__init__(coordinator, description.key)
         self.entity_description = description
+        if placeholders is not None:
+            self._attr_translation_placeholders = placeholders
 
     async def async_press(self) -> None:
         try:
@@ -69,4 +95,4 @@ class StarPilotButton(StarPilotEntity, ButtonEntity):
                 translation_domain=DOMAIN, translation_key="action_failed", translation_placeholders={"error": str(error)}
             ) from error
         self.coordinator.forget(*self.entity_description.refresh)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_refresh()

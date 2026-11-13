@@ -68,3 +68,45 @@ async def test_navigate_without_a_comma(hass: HomeAssistant, loaded: MockConfigE
     assert await hass.config_entries.async_unload(loaded.entry_id)
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(DOMAIN, "navigate", {"latitude": 51.5, "longitude": -2.6}, blocking=True)
+
+
+async def test_get_settings(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    response = await hass.services.async_call(
+        DOMAIN, "get_settings", {"page": "sounds"}, blocking=True, return_response=True
+    )
+    assert response["title"] == "Sounds & Alerts" and response["parked"] is True
+    assert response["settings"][1] == {
+        "label": "Engagement Chime",
+        "value": "Auto",
+        "choices": ["0%", "50%", "Auto"],
+        "unit": "%",
+        "available": True,
+    }
+    assert response["settings"][2]["reason"] == "Needs a car"
+
+
+async def test_set_setting(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    response = await hass.services.async_call(
+        DOMAIN, "set_setting", {"page": "sounds", "setting": "engagement chime", "value": "50%"},
+        blocking=True, return_response=True,
+    )
+    assert response == {"setting": "Engagement Chime", "previous": "Auto", "value": "50%"}
+    assert galaxy.posts[:2] == [
+        ("/api/settings/preview", {"view": "view-1", "row": 1, "value": "50%"}),
+        ("/api/settings/confirm", {"intent": "intent-1", "confirmed": True}),
+    ]
+    assert galaxy.replies["/api/settings/pages/sounds"]["rows"][1]["value"] == "50%"
+
+
+async def test_set_setting_refusals(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    for data, message in (
+        ({"page": "sounds", "setting": "No such thing", "value": "On"}, "no setting called"),
+        ({"page": "sounds", "setting": "Locked", "value": True}, "cannot be changed"),
+        ({"page": "sounds", "setting": "Engagement Chime", "value": "11%"}, "Saved settings changed"),
+        ({"page": "nowhere", "setting": "x", "value": "On"}, "Capability unavailable"),
+    ):
+        with pytest.raises(HomeAssistantError, match=message):
+            await hass.services.async_call(DOMAIN, "set_setting", data, blocking=True)
+    assert not any(path == "/api/settings/confirm" for path, _ in galaxy.posts)
+    with pytest.raises(Exception):  # noqa: B017, PT011 - schema rejects a page that is not an ID
+        await hass.services.async_call(DOMAIN, "set_setting", {"page": "../auth", "setting": "x", "value": "On"}, blocking=True)

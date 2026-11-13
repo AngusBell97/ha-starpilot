@@ -6,18 +6,24 @@ Shows a comma device running StarPilot as a device in Home Assistant. It reads G
 
 | Kind | Entities |
 |---|---|
-| State | Status (Parked / Car on / Driving), Driving |
-| Device health | Temperature, Car battery voltage, Free storage, Memory usage, Fan speed, Processes |
-| Software | StarPilot version, Update, Driving model |
-| Drives | Last drive distance, duration, engaged and end time; Distance in the past week |
-| Navigation | Navigation state, Destination, Clear destination button |
-| External GPU | Status, temperature, power and whether it is running the driving model (only when one is fitted) |
-| Controls | Drive state (Automatic / Always offroad / Always onroad), Check for updates |
+| State | Status (Parked / Car on / Driving), Driving, Drive state in effect |
+| Device health | Temperature (plus CPU, GPU and memory), Thermal status, CPU usage, Memory, Storage, Fan speed, Car battery voltage, Processes, Last boot |
+| Software | StarPilot version, Branch, Update, Updater, Last update check, Changed settings, Crash reports |
+| Driving models | Driving model, Loaded driving model, Small driving model, health, models installed, download in progress |
+| Drives | Last drive (distance, duration, engaged, Always On Lateral, start, end, model, distracted and unresponsive moments), past week and all-time totals, six records, analysis state |
+| Navigation | State, Destination, Next instruction, GPS source, network, map usage counters, Clear destination button |
+| External GPU | Status, link, temperature and memory temperature, highest logged temperatures, usage, power, supply voltage / current / power, clock, fan, frame time, USB speed and link errors, running the driving model (only when one is fitted) |
+| Other | Sentry events, Outside temperature, Galaxy remote access, Galaxy hotspot |
+| Controls | Drive state (Automatic / Always offroad / Always onroad), Navigation, Slow for turns, Avoid tolls / motorways / ferries, Check for updates, Reset highest GPU temperatures |
 | Events | Drive finished, Notification |
 
-Some diagnostic entities start disabled: the separate CPU, GPU and memory temperatures, Last boot, Processes running, Total distance, the external GPU supply voltage and the Location tracker.
+The per-core CPU usage sensors and the Location tracker start disabled. External GPU readings such as temperature, usage and power only have values while the driving model is running on it.
 
-There is one action, **StarPilot: Set destination** (`starpilot.navigate`). Give it either a search, or a latitude and longitude with an optional name.
+## Actions
+
+- **Set destination** (`starpilot.navigate`): give either a search, or a latitude and longitude with an optional name.
+- **Get settings** (`starpilot.get_settings`): reads one Galaxy settings page (for example `sounds`, `lane_change`, `slc` or `aol`) with each setting's value and choices.
+- **Change a setting** (`starpilot.set_setting`): changes one setting by page and name, the way Galaxy's own page does. Most settings can only be changed while parked.
 
 ## Limits
 

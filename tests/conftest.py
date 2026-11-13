@@ -32,6 +32,7 @@ class FakeGalaxy:
             {"id": "abc", "name": "Bristol Airport", "address": "Bristol BS48 3DY", "latitude": 51.38, "longitude": -2.71}
         ]
         self.error: Exception | None = None
+        self.pending: tuple[int, Any] = (0, None)
 
     async def call(self, method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
         if self.error is not None:
@@ -44,6 +45,19 @@ class FakeGalaxy:
         self.posts.append((path, payload))
         if path == "/api/navigation/search":
             return {"results": self.search_results}
+        if path == "/api/navigation/action" and payload["action"] == "configure":
+            self.replies["/api/navigation/status"].update(payload["patch"])
+            return self.replies["/api/navigation/status"]
+        if path == "/api/settings/preview":
+            row = self.replies["/api/settings/pages/sounds"]["rows"][payload["row"]]
+            if payload["value"] not in row["choices"]:
+                raise GalaxyApiError(409, "Saved settings changed; refresh the page")
+            self.pending = (payload["row"], payload["value"])
+            return {"intent": "intent-1", "question": "Change it?", "proposed": payload["value"]}
+        if path == "/api/settings/confirm":
+            index, value = self.pending
+            self.replies["/api/settings/pages/sounds"]["rows"][index]["value"] = value
+            return {"saved": True}
         if path == "/api/navigation/action":
             navigation = self.replies["/api/navigation/status"]
             navigation["destination"] = payload.get("destination") if payload["action"] == "select" else None

@@ -35,3 +35,39 @@ navigate:
           max: 180
           step: any
           mode: box
+
+get_settings:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: starpilot
+    page:
+      required: true
+      example: "lane_change"
+      selector:
+        text:
+
+set_setting:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: starpilot
+    page:
+      required: true
+      example: "sounds"
+      selector:
+        text:
+    setting:
+      required: true
+      example: "Engagement Chime"
+      selector:
+        text:
+    value:
+      required: true
+      example: "50%"
+      selector:
+        text:

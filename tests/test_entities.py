@@ -61,7 +61,7 @@ async def test_external_gpu(hass: HomeAssistant, loaded: MockConfigEntry) -> Non
     assert status.state == "Connected · not running the driving model"
     assert status.attributes["friendly_name"] == "comma four Chestnut status"
     assert _state(hass, loaded, "sensor", "external_gpu_temperature").state == STATE_UNKNOWN
-    assert _state(hass, loaded, "sensor", "external_gpu_temperature").attributes["highest_logged"] == 53.0
+    assert _state(hass, loaded, "sensor", "external_gpu_temperature").attributes["limit"] == 100.0
     assert _state(hass, loaded, "binary_sensor", "external_gpu_running_model").state == STATE_OFF
 
 
@@ -190,3 +190,90 @@ async def test_unload(hass: HomeAssistant, loaded: MockConfigEntry) -> None:
     assert await hass.config_entries.async_unload(loaded.entry_id)
     await hass.async_block_till_done()
     assert loaded.state is ConfigEntryState.NOT_LOADED
+
+
+async def test_new_readings(hass: HomeAssistant, loaded: MockConfigEntry) -> None:
+    for key, expected in (
+        ("cpu_usage", "13.4"),
+        ("memory_used", "1210.5"),
+        ("storage_usage", "84.9"),
+        ("process_count", "553"),
+        ("thermal_status", "Normal"),
+        ("drive_state_in_effect", "offroad"),
+        ("branch", "Dom"),
+        ("updater_state", "idle"),
+        ("last_update_check", "2026-11-13T20:52:04+00:00"),
+        ("changed_settings", "87"),
+        ("crash_reports", "64"),
+        ("sentry_events", "0"),
+        ("outside_temperature", "9.5"),
+        ("small_model", "Polaris"),
+        ("loaded_model", STATE_UNKNOWN),
+        ("model_health", "unavailable"),
+        ("models_installed", "4"),
+        ("last_drive_model", "Light Speed 2 (Chestnut big)"),
+        ("last_drive_distracted", "0"),
+        ("week_drives", "3"),
+        ("week_engaged", "56.0"),
+        ("total_drives", "33"),
+        ("total_engaged", "54.8"),
+        ("record_longest_drive", "53.41"),
+        ("record_most_engaged_day", "84.7"),
+        ("record_highest_streak", "6"),
+        ("record_clean_drive_streak", "33"),
+        ("record_best_week", STATE_UNKNOWN),
+        ("drive_analysis", "idle"),
+        ("gps_source", "comma"),
+        ("navigation_network", "unknown"),
+        ("mapbox_searches", "3"),
+        ("mapbox_directions", "15"),
+        ("external_gpu_supply_power", "18.4"),
+        ("external_gpu_supply_current", "1.38"),
+        ("external_gpu_usage", STATE_UNKNOWN),
+        ("external_gpu_highest_temperature", "53.0"),
+        ("external_gpu_highest_memory_temperature", "72.0"),
+        ("external_gpu_usb_speed", "5000"),
+        ("external_gpu_usb_link_errors", "14"),
+        ("external_gpu_link", "GPU link up"),
+    ):
+        assert _state(hass, loaded, "sensor", key).state == expected, key
+    assert _state(hass, loaded, "binary_sensor", "remote_access").state == "on"
+    assert _state(hass, loaded, "binary_sensor", "hotspot").state == STATE_OFF
+    assert _state(hass, loaded, "binary_sensor", "model_download").state == STATE_OFF
+
+
+async def test_cpu_cores_are_off_by_default(hass: HomeAssistant, loaded: MockConfigEntry) -> None:
+    registry = er.async_get(hass)
+    for index in (0, 1):
+        entity_id = registry.async_get_entity_id("sensor", DOMAIN, f"{loaded.entry_id}_cpu_core_{index}_usage")
+        assert entity_id == f"sensor.comma_four_cpu_core_{index}_usage"
+        assert registry.async_get(entity_id).disabled_by is er.RegistryEntryDisabler.INTEGRATION
+
+
+async def test_secrets_are_not_kept(hass: HomeAssistant, loaded: MockConfigEntry) -> None:
+    text = repr(loaded.runtime_data.data)
+    assert "secret-slug" not in text and "hotspot-secret" not in text
+
+
+async def test_navigation_switches(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    assert _state(hass, loaded, "switch", "slow_for_turns").state == "on"
+    assert _state(hass, loaded, "switch", "navigation_enabled").state == "on"
+    entity_id = er.async_get(hass).async_get_entity_id("switch", DOMAIN, f"{loaded.entry_id}_avoid_tolls")
+    assert hass.states.get(entity_id).state == STATE_OFF
+    await hass.services.async_call("switch", "turn_on", {"entity_id": entity_id}, blocking=True)
+    await hass.async_block_till_done()
+    assert galaxy.posts[-1] == (
+        "/api/navigation/action",
+        {"action": "configure", "revision": "fedcba9876543210fedcba9876543210", "patch": {"avoidTolls": True}},
+    )
+    assert hass.states.get(entity_id).state == "on"
+    await hass.services.async_call("switch", "turn_off", {"entity_id": entity_id}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == STATE_OFF
+
+
+async def test_reset_gpu_peaks_button(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    entity_id = er.async_get(hass).async_get_entity_id("button", DOMAIN, f"{loaded.entry_id}_reset_external_gpu_peaks")
+    assert entity_id == "button.comma_four_reset_chestnut_highest_temperatures"
+    await hass.services.async_call("button", "press", {"entity_id": entity_id}, blocking=True)
+    assert galaxy.posts[-1] == ("/api/system/monitor/reset-peaks", {"gpu": "chestnut"})

@@ -16,7 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from custom_components.starpilot.api import GalaxyClient  # noqa: E402
 from custom_components.starpilot.binary_sensor import BINARY_SENSORS  # noqa: E402
-from custom_components.starpilot.coordinator import SECTIONS, external_gpu  # noqa: E402
+from custom_components.starpilot.api import GalaxyApiError  # noqa: E402
+from custom_components.starpilot.coordinator import SECTIONS, external_gpu, trim  # noqa: E402
 from custom_components.starpilot.sensor import GPU_SENSORS, SENSORS  # noqa: E402
 
 
@@ -30,12 +31,11 @@ async def main() -> int:
         client = GalaxyClient(session, host, port)
         data = {}
         for section, (path, _) in SECTIONS.items():
-            value = await client.async_get(path)
-            if section == "monitor":
-                value.pop("processes", None)
-            elif section == "models":
-                catalog = value.pop("catalog", [])
-                value["names"] = {row["id"]: row["name"] for row in catalog}
+            try:
+                value = trim(section, await client.async_get(path))
+            except GalaxyApiError as error:
+                print(f"skip {path}: {error}")
+                continue
             data[section] = value
             print(f"read {path}")
         print()

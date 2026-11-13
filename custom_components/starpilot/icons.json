@@ -9,34 +9,228 @@
           "driving": "mdi:steering"
         }
       },
-      "fan_speed": { "default": "mdi:fan" },
-      "memory_usage": { "default": "mdi:memory" },
-      "storage_free": { "default": "mdi:harddisk" },
-      "car_battery_voltage": { "default": "mdi:car-battery" },
-      "processes": { "default": "mdi:format-list-checks" },
-      "version": { "default": "mdi:star-four-points" },
-      "driving_model": { "default": "mdi:brain" },
-      "last_drive_distance": { "default": "mdi:map-marker-distance" },
-      "last_drive_engaged": { "default": "mdi:steering" },
-      "week_distance": { "default": "mdi:map-marker-distance" },
-      "total_distance": { "default": "mdi:counter" },
-      "navigation": { "default": "mdi:navigation" },
-      "destination": { "default": "mdi:map-marker" },
-      "external_gpu_status": { "default": "mdi:expansion-card" }
+      "fan_speed": {
+        "default": "mdi:fan"
+      },
+      "memory_usage": {
+        "default": "mdi:memory"
+      },
+      "storage_free": {
+        "default": "mdi:harddisk"
+      },
+      "car_battery_voltage": {
+        "default": "mdi:car-battery"
+      },
+      "processes": {
+        "default": "mdi:format-list-checks"
+      },
+      "version": {
+        "default": "mdi:star-four-points"
+      },
+      "driving_model": {
+        "default": "mdi:brain"
+      },
+      "last_drive_distance": {
+        "default": "mdi:map-marker-distance"
+      },
+      "last_drive_engaged": {
+        "default": "mdi:steering"
+      },
+      "week_distance": {
+        "default": "mdi:map-marker-distance"
+      },
+      "total_distance": {
+        "default": "mdi:counter"
+      },
+      "navigation": {
+        "default": "mdi:navigation"
+      },
+      "destination": {
+        "default": "mdi:map-marker"
+      },
+      "external_gpu_status": {
+        "default": "mdi:expansion-card"
+      },
+      "cpu_usage": {
+        "default": "mdi:cpu-64-bit"
+      },
+      "cpu_core_usage": {
+        "default": "mdi:cpu-64-bit"
+      },
+      "thermal_status": {
+        "default": "mdi:thermometer-alert"
+      },
+      "storage_usage": {
+        "default": "mdi:harddisk"
+      },
+      "process_count": {
+        "default": "mdi:format-list-bulleted"
+      },
+      "branch": {
+        "default": "mdi:source-branch"
+      },
+      "updater_state": {
+        "default": "mdi:update"
+      },
+      "changed_settings": {
+        "default": "mdi:tune"
+      },
+      "crash_reports": {
+        "default": "mdi:bug"
+      },
+      "sentry_events": {
+        "default": "mdi:shield-car"
+      },
+      "loaded_model": {
+        "default": "mdi:brain"
+      },
+      "small_model": {
+        "default": "mdi:brain"
+      },
+      "model_health": {
+        "default": "mdi:heart-pulse"
+      },
+      "models_installed": {
+        "default": "mdi:download-box"
+      },
+      "last_drive_model": {
+        "default": "mdi:brain"
+      },
+      "last_drive_always_on_lateral": {
+        "default": "mdi:steering"
+      },
+      "last_drive_distracted": {
+        "default": "mdi:eye-off"
+      },
+      "last_drive_unresponsive": {
+        "default": "mdi:sleep"
+      },
+      "week_drives": {
+        "default": "mdi:counter"
+      },
+      "week_engaged": {
+        "default": "mdi:steering"
+      },
+      "total_drives": {
+        "default": "mdi:counter"
+      },
+      "total_engaged": {
+        "default": "mdi:steering"
+      },
+      "record_longest_drive": {
+        "default": "mdi:trophy"
+      },
+      "record_best_week": {
+        "default": "mdi:trophy"
+      },
+      "record_most_engaged_day": {
+        "default": "mdi:trophy"
+      },
+      "record_longest_undistracted_drive": {
+        "default": "mdi:trophy"
+      },
+      "record_highest_streak": {
+        "default": "mdi:trophy"
+      },
+      "record_clean_drive_streak": {
+        "default": "mdi:trophy"
+      },
+      "drive_analysis": {
+        "default": "mdi:chart-timeline-variant"
+      },
+      "navigation_instruction": {
+        "default": "mdi:arrow-right-top"
+      },
+      "gps_source": {
+        "default": "mdi:crosshairs-gps"
+      },
+      "navigation_network": {
+        "default": "mdi:signal"
+      },
+      "mapbox_searches": {
+        "default": "mdi:map-search"
+      },
+      "mapbox_geocoding": {
+        "default": "mdi:map-search"
+      },
+      "mapbox_map_tiles": {
+        "default": "mdi:map"
+      },
+      "mapbox_directions": {
+        "default": "mdi:directions"
+      },
+      "drive_state_in_effect": {
+        "default": "mdi:car-cog"
+      },
+      "external_gpu_link": {
+        "default": "mdi:usb"
+      },
+      "external_gpu_usage": {
+        "default": "mdi:expansion-card"
+      },
+      "external_gpu_fan_speed": {
+        "default": "mdi:fan"
+      },
+      "external_gpu_usb_link_errors": {
+        "default": "mdi:usb"
+      }
     },
     "select": {
-      "drive_mode": { "default": "mdi:car-cog" }
+      "drive_mode": {
+        "default": "mdi:car-cog"
+      }
     },
     "button": {
-      "clear_destination": { "default": "mdi:map-marker-off" },
-      "check_for_updates": { "default": "mdi:update" }
+      "clear_destination": {
+        "default": "mdi:map-marker-off"
+      },
+      "check_for_updates": {
+        "default": "mdi:update"
+      },
+      "reset_external_gpu_peaks": {
+        "default": "mdi:thermometer-minus"
+      }
     },
     "event": {
-      "drive": { "default": "mdi:flag-checkered" },
-      "notification": { "default": "mdi:bell" }
+      "drive": {
+        "default": "mdi:flag-checkered"
+      },
+      "notification": {
+        "default": "mdi:bell"
+      }
+    },
+    "switch": {
+      "navigation_enabled": {
+        "default": "mdi:navigation"
+      },
+      "slow_for_turns": {
+        "default": "mdi:arrow-u-left-top"
+      },
+      "avoid_tolls": {
+        "default": "mdi:cash-off"
+      },
+      "avoid_motorways": {
+        "default": "mdi:highway"
+      },
+      "avoid_ferries": {
+        "default": "mdi:ferry"
+      }
+    },
+    "binary_sensor": {
+      "hotspot": {
+        "default": "mdi:wifi"
+      }
     }
   },
   "services": {
-    "navigate": { "service": "mdi:navigation" }
+    "navigate": {
+      "service": "mdi:navigation"
+    },
+    "get_settings": {
+      "service": "mdi:tune"
+    },
+    "set_setting": {
+      "service": "mdi:tune-variant"
+    }
   }
 }

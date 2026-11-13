@@ -25,7 +25,16 @@ SECTIONS: dict[str, tuple[str, int]] = {
     "drives": ("/api/drives/stats", 120),
     "models": ("/api/models/status", 300),
     "software": ("/api/software/status?history=0", 300),
+    "manager": ("/api/models/manager", 300),
+    "weather": ("/api/weather", 300),
+    "sentry": ("/api/sentry/events", 120),
+    "crashes": ("/api/crash-reports", 600),
+    "changed": ("/api/settings/non-defaults", 600),
+    "remote": ("/api/galaxy/status", 300),
+    "hotspot": ("/api/galaxy/hotspot", 300),
 }
+# Only the vehicle state is needed for the device to count as reachable; the rest may be missing on older builds.
+REQUIRED = ("state",)
 
 
 def dig(data: Any, *path: str) -> Any:
@@ -54,6 +63,48 @@ def external_gpu(data: dict[str, Any]) -> dict[str, Any] | None:
     if isinstance(gpus, list) and gpus and isinstance(gpus[0], dict):
         return gpus[0]
     return None
+
+
+def _names(rows: Any, key: str, label: str) -> dict[str, str]:
+    if not isinstance(rows, list):
+        return {}
+    return {row[key]: row[label] for row in rows if isinstance(row, dict) and key in row and label in row}
+
+
+def trim(section: str, value: dict[str, Any]) -> dict[str, Any]:
+    """Keep what entities read. Drops bulky lists and anything private (remote link, hotspot password)."""
+    if section == "monitor":
+        # Several hundred process rows that no entity uses.
+        value.pop("processes", None)
+    elif section == "models":
+        value["names"] = _names(value.pop("catalog", None), "id", "name")
+    elif section == "manager":
+        return {
+            "activeSmallModel": value.get("activeSmallModel"),
+            "activeBigModel": value.get("activeBigModel"),
+            "names": _names(value.get("models"), "value", "label"),
+            "installed": dig(value, "summary", "installed"),
+            "downloading": value.get("downloading"),
+        }
+    elif section == "crashes":
+        reports = value.get("reports")
+        times = [row.get("modifiedAt") for row in reports if isinstance(row, dict)] if isinstance(reports, list) else []
+        times = [stamp for stamp in times if isinstance(stamp, (int, float))]
+        return {
+            "reportCount": value.get("reportCount"),
+            "storageBytes": value.get("storageBytes"),
+            "latest": max(times) if times else None,
+        }
+    elif section == "changed":
+        return {"count": value.get("count")}
+    elif section == "sentry":
+        events = value.get("events")
+        return {"count": len(events) if isinstance(events, list) else None, "storageBytes": value.get("storageBytes")}
+    elif section == "remote":
+        return {"paired": value.get("paired")}
+    elif section == "hotspot":
+        return {"active": value.get("active"), "state": value.get("state"), "enabled": dig(value, "config", "enabled")}
+    return value
 
 
 class StarPilotCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -109,21 +160,12 @@ class StarPilotCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             except GalaxyApiError as error:
                 # One part of Galaxy can be unavailable (503 while it starts up) without the rest failing.
                 LOGGER.debug("Galaxy %s is unavailable: %s", path, error)
-                if section == "state":
+                if section in REQUIRED:
                     raise UpdateFailed(f"Galaxy has no vehicle state: {error}") from error
                 continue
             if not isinstance(value, dict):
                 continue
-            if section == "monitor":
-                # Several hundred process rows that no entity uses.
-                value.pop("processes", None)
-            elif section == "models":
-                catalog = value.pop("catalog", None)
-                value["names"] = (
-                    {row["id"]: row["name"] for row in catalog if isinstance(row, dict) and "id" in row and "name" in row}
-                    if isinstance(catalog, list)
-                    else {}
-                )
+            value = trim(section, value)
             self._sections[section] = value
             self._read_at[section] = now
         return dict(self._sections)
