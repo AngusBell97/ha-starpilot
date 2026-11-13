@@ -32,6 +32,9 @@ class FakeGalaxy:
             {"id": "abc", "name": "Bristol Airport", "address": "Bristol BS48 3DY", "latitude": 51.38, "longitude": -2.71}
         ]
         self.error: Exception | None = None
+        self.place_results: list[dict[str, Any]] | None = [
+            {"id": "poi-1", "name": "Bristol Airport (BRS)", "description": "Bristol, BS48 3DY, United Kingdom"}
+        ]
         self.pending: tuple[int, Any] = (0, None)
 
     async def call(self, method: str, path: str, payload: dict[str, Any] | None = None) -> Any:
@@ -43,8 +46,16 @@ class FakeGalaxy:
             return self.replies[path]
         assert payload is not None
         self.posts.append((path, payload))
+        if path == "/api/navigation/search" and "searchId" in payload:
+            if self.place_results is None:
+                raise GalaxyApiError(400, "Start a new destination search")
+            return {"results": [dict(place, searchId=payload["searchId"]) for place in self.place_results]}
         if path == "/api/navigation/search":
             return {"results": self.search_results}
+        if path == "/api/navigation/action" and payload["action"] == "selectPlace":
+            navigation = self.replies["/api/navigation/status"]
+            navigation["destination"] = {"id": payload["id"], "name": "Bristol Airport (BRS)", "temporary": True}
+            return navigation
         if path == "/api/navigation/action" and payload["action"] == "configure":
             self.replies["/api/navigation/status"].update(payload["patch"])
             return self.replies["/api/navigation/status"]

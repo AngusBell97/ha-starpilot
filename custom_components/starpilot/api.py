@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 from urllib.parse import quote
+import uuid
 
 import aiohttp
 
@@ -119,6 +120,29 @@ class GalaxyClient:
         result = await self._call("POST", "/api/navigation/search", {"query": query})
         places = result.get("results") if isinstance(result, dict) else None
         return [place for place in places if isinstance(place, dict)] if isinstance(places, list) else []
+
+    async def async_search_places(self, query: str) -> list[dict[str, Any]]:
+        """Search places and addresses the way Galaxy's search box does. Each result carries its searchId."""
+        result = await self._call(
+            "POST",
+            "/api/navigation/search",
+            {"query": query, "searchId": str(uuid.uuid4()), "clientId": str(uuid.uuid4())},
+        )
+        places = result.get("results") if isinstance(result, dict) else None
+        return [
+            place
+            for place in (places if isinstance(places, list) else [])
+            if isinstance(place, dict) and isinstance(place.get("id"), str) and isinstance(place.get("searchId"), str)
+        ]
+
+    async def async_navigate_to_place(self, place: dict[str, Any]) -> dict[str, Any]:
+        """Set the destination to a result from async_search_places."""
+        navigation = await self._call("GET", "/api/navigation/status")
+        return await self._call(
+            "POST",
+            "/api/navigation/action",
+            {"action": "selectPlace", "revision": navigation["revision"], "id": place["id"], "searchId": place["searchId"]},
+        )
 
     async def async_navigate(self, destination: dict[str, Any]) -> dict[str, Any]:
         """Set the navigation destination (name, latitude, longitude, optional address)."""

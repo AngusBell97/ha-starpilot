@@ -31,18 +31,36 @@ async def test_navigate_to_coordinates(hass: HomeAssistant, loaded: MockConfigEn
     assert hass.states.get(entity_id).state == "Work"
 
 
-async def test_navigate_by_search(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+async def test_navigate_by_search_prefers_named_places(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
     response = await hass.services.async_call(
         DOMAIN, "navigate", {"query": "Bristol Airport"}, blocking=True, return_response=True
     )
-    assert galaxy.posts[0] == ("/api/navigation/search", {"query": "Bristol Airport"})
-    assert galaxy.posts[1][1]["destination"] == {
-        "name": "Bristol Airport",
-        "address": "Bristol BS48 3DY",
-        "latitude": 51.38,
-        "longitude": -2.71,
-    }
-    assert response["destination"]["name"] == "Bristol Airport"
+    path, search = galaxy.posts[0]
+    assert path == "/api/navigation/search" and search["query"] == "Bristol Airport"
+    assert len(search["searchId"]) == 36 and len(search["clientId"]) == 36 and search["searchId"] != search["clientId"]
+    assert galaxy.posts[1] == (
+        "/api/navigation/action",
+        {"action": "selectPlace", "revision": REVISION, "id": "poi-1", "searchId": search["searchId"]},
+    )
+    assert response["destination"] == {"name": "Bristol Airport (BRS)", "address": "Bristol, BS48 3DY, United Kingdom"}
+    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{loaded.entry_id}_destination")
+    assert hass.states.get(entity_id).state == "Bristol Airport (BRS)"
+
+
+async def test_navigate_by_search_falls_back_to_addresses(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
+    for places in (None, []):
+        galaxy.place_results, galaxy.posts = places, []
+        response = await hass.services.async_call(
+            DOMAIN, "navigate", {"query": "Bristol Airport"}, blocking=True, return_response=True
+        )
+        assert galaxy.posts[1] == ("/api/navigation/search", {"query": "Bristol Airport"})
+        assert galaxy.posts[2][1]["destination"] == {
+            "name": "Bristol Airport",
+            "address": "Bristol BS48 3DY",
+            "latitude": 51.38,
+            "longitude": -2.71,
+        }
+        assert response["destination"]["name"] == "Bristol Airport"
 
 
 async def test_navigate_needs_one_kind_of_destination(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
@@ -53,7 +71,7 @@ async def test_navigate_needs_one_kind_of_destination(hass: HomeAssistant, loade
 
 
 async def test_navigate_no_result(hass: HomeAssistant, loaded: MockConfigEntry, galaxy: FakeGalaxy) -> None:
-    galaxy.search_results = []
+    galaxy.search_results, galaxy.place_results = [], []
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(DOMAIN, "navigate", {"query": "nowhere at all"}, blocking=True)
 

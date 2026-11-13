@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 import time
 from typing import Any
@@ -11,7 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import GalaxyAccessError, GalaxyApiError, GalaxyClient, GalaxyConnectionError
+from .api import GalaxyAccessError, GalaxyApiError, GalaxyClient, GalaxyConnectionError, GalaxyError
 from .const import DEVICE_MODELS, DOMAIN, LOGGER, UPDATE_INTERVAL_SECONDS
 
 type StarPilotConfigEntry = ConfigEntry[StarPilotCoordinator]
@@ -35,6 +36,8 @@ SECTIONS: dict[str, tuple[str, int]] = {
 }
 # Only the vehicle state is needed for the device to count as reachable; the rest may be missing on older builds.
 REQUIRED = ("state",)
+# Galaxy only works out CPU usage when its previous reading was under ten seconds earlier.
+CPU_RESAMPLE_SECONDS = 2.0
 
 
 def dig(data: Any, *path: str) -> Any:
@@ -165,6 +168,14 @@ class StarPilotCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 continue
             if not isinstance(value, dict):
                 continue
+            if section == "monitor" and value.get("cpuPercent") is None:
+                await asyncio.sleep(CPU_RESAMPLE_SECONDS)
+                try:
+                    again = await self.client.async_get(path)
+                except GalaxyError:
+                    again = None
+                if isinstance(again, dict):
+                    value = again
             value = trim(section, value)
             self._sections[section] = value
             self._read_at[section] = now

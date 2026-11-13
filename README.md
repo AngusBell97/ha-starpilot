@@ -31,7 +31,8 @@ The per-core CPU usage sensors and the Location tracker start disabled. External
 - Galaxy gives password-free access to devices on the same local network that reach it by IP address. A proxy between Home Assistant and the comma will be refused.
 - Give the comma a fixed address in your router. If it changes, use **Reconfigure** on the integration.
 - "Last drive" is the most recent drive Galaxy has finished analysing, which can lag the drive you just finished by a few minutes.
-- Drive state uses Galaxy's own control, so Galaxy's own checks apply (it refuses Always offroad unless the car is parked).
+- Drive state uses Galaxy's own control, so Galaxy's own checks apply. It only accepts Always offroad while the car is on and it can see the car is in Park; with the car off it refuses and Home Assistant shows Galaxy's reason.
+- CPU usage needs two readings a couple of seconds apart, so the device-health poll takes about two seconds longer than the others.
 
 ## Notifications from the comma
 

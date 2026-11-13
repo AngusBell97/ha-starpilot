@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, Supp
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
-from .api import GalaxyError
+from .api import GalaxyApiError, GalaxyError
 from .const import DOMAIN
 from .coordinator import StarPilotCoordinator
 
@@ -83,18 +83,31 @@ async def _navigate(call: ServiceCall) -> ServiceResponse:
             }
             if call.data.get(ATTR_ADDRESS):
                 destination["address"] = call.data[ATTR_ADDRESS]
+            await coordinator.client.async_navigate(destination)
         else:
-            places = await coordinator.client.async_search(call.data[ATTR_QUERY])
-            if not places:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="no_search_result",
-                    translation_placeholders={"query": call.data[ATTR_QUERY]},
-                )
-            destination = {
-                key: places[0][key] for key in ("name", "latitude", "longitude", "address") if key in places[0]
-            }
-        await coordinator.client.async_navigate(destination)
+            query = call.data[ATTR_QUERY]
+            try:
+                # Finds named places such as an airport or a shop, not only street addresses.
+                places = await coordinator.client.async_search_places(query)
+            except GalaxyApiError:
+                places = []
+            if places:
+                await coordinator.client.async_navigate_to_place(places[0])
+                destination = {"name": places[0].get("name")}
+                if places[0].get("description"):
+                    destination["address"] = places[0]["description"]
+            else:
+                addresses = await coordinator.client.async_search(query)
+                if not addresses:
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="no_search_result",
+                        translation_placeholders={"query": query},
+                    )
+                destination = {
+                    key: addresses[0][key] for key in ("name", "latitude", "longitude", "address") if key in addresses[0]
+                }
+                await coordinator.client.async_navigate(destination)
     except GalaxyError as error:
         raise HomeAssistantError(
             translation_domain=DOMAIN, translation_key="action_failed", translation_placeholders={"error": str(error)}
@@ -116,6 +129,10 @@ async def _get_settings(call: ServiceCall) -> ServiceResponse:
         if not isinstance(row, dict):
             continue
         entry: dict[str, Any] = {key: row[key] for key in ROW_FIELDS if row.get(key) not in (None, "", [])}
+        if not entry.get("step"):
+            # A choice list, not a slider: its zero range means nothing.
+            for key in ("minimum", "maximum", "step"):
+                entry.pop(key, None)
         if row.get("page"):
             entry["opens_page"] = row["page"]
         settings.append(entry)

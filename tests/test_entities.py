@@ -277,3 +277,27 @@ async def test_reset_gpu_peaks_button(hass: HomeAssistant, loaded: MockConfigEnt
     assert entity_id == "button.comma_four_reset_chestnut_highest_temperatures"
     await hass.services.async_call("button", "press", {"entity_id": entity_id}, blocking=True)
     assert galaxy.posts[-1] == ("/api/system/monitor/reset-peaks", {"gpu": "chestnut"})
+
+
+async def test_cpu_usage_needs_a_second_reading(
+    hass: HomeAssistant, entry: MockConfigEntry, galaxy: FakeGalaxy, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Galaxy leaves CPU usage empty unless it was read under ten seconds earlier, so the first read is repeated."""
+    monkeypatch.setattr("custom_components.starpilot.coordinator.CPU_RESAMPLE_SECONDS", 0)
+    reads = 0
+    original = galaxy.call
+
+    async def call(method, path, payload=None):
+        nonlocal reads
+        value = await original(method, path, payload)
+        if path == "/api/system/monitor":
+            reads += 1
+            if reads == 1:
+                return {**value, "cpuPercent": None}
+        return value
+
+    galaxy.call = call
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert reads == 2
+    assert _state(hass, entry, "sensor", "cpu_usage").state == "13.4"
